@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { moveTask } from "@/lib/actions/tasks";
 import { createClient } from "@/lib/supabase/client";
+import { SEVERITY_STYLE, deadlineLabel, deadlineSeverity } from "@/lib/deadline";
 import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
@@ -335,11 +336,25 @@ function TaskCard({
           {task.description}
         </p>
       )}
-      {task.deadline && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          ⏰ {new Date(task.deadline).toLocaleDateString("sk-SK")}
-        </p>
+      {task.deadline && <DeadlineBadge task={task} />}
+    </div>
+  );
+}
+
+function DeadlineBadge({ task }: { task: Task }) {
+  const severity = deadlineSeverity(task.deadline, task.status === "done");
+  if (severity === "none") return null;
+  const style = SEVERITY_STYLE[severity];
+  const label = deadlineLabel(task.deadline);
+  return (
+    <div
+      className={cn(
+        "mt-2 inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs",
+        style.className
       )}
+    >
+      <span>{style.icon}</span>
+      <span>{label}</span>
     </div>
   );
 }

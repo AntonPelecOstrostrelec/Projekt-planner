@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderKanban, Home } from "lucide-react";
+import { Calendar, FolderKanban, Home, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,12 @@ export function Sidebar() {
           href: `/w/${wsSlug}/projects`,
           label: "Projekty",
           icon: FolderKanban,
+        },
+        { href: `/w/${wsSlug}/calendar`, label: "Kalendár", icon: Calendar },
+        {
+          href: `/w/${wsSlug}/settings/notifications`,
+          label: "Notifikácie",
+          icon: Settings,
         },
       ]
     : [{ href: "/", label: "Prehľad", icon: Home, exact: true }];

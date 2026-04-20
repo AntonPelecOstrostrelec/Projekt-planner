@@ -4,8 +4,15 @@ import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { NotificationsBell } from "@/components/layout/notifications-bell";
 
-export function Topbar({ userEmail }: { userEmail?: string }) {
+export function Topbar({
+  userEmail,
+  userId,
+}: {
+  userEmail?: string;
+  userId?: string;
+}) {
   const { setTheme, resolvedTheme } = useTheme();
 
   return (
@@ -14,6 +21,7 @@ export function Topbar({ userEmail }: { userEmail?: string }) {
         {userEmail ? `Prihlásený ako ${userEmail}` : ""}
       </div>
       <div className="flex items-center gap-2">
+        {userId && <NotificationsBell userId={userId} />}
         <Button
           variant="ghost"
           size="icon"

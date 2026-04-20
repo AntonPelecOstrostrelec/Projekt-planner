@@ -16,6 +16,8 @@ export default async function WorkspaceLayout({
   const nav = [
     { href: `/w/${workspace.slug}`, label: "Prehľad" },
     { href: `/w/${workspace.slug}/projects`, label: "Projekty" },
+    { href: `/w/${workspace.slug}/calendar`, label: "Kalendár" },
+    { href: `/w/${workspace.slug}/settings/notifications`, label: "Notifikácie" },
   ];
 
   return (
