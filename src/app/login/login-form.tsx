@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 // Flip to `true` once Supabase SMTP is configured and magic-link delivery
-// is reliable. Until then we rely on Google OAuth only.
+// is reliable. Until then we rely on Google OAuth + password only.
 const EMAIL_LOGIN_ENABLED = false;
 
 export function LoginForm() {
@@ -23,16 +23,8 @@ export function LoginForm() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dev-only password login: visible only when running on localhost.
-  const [devVisible, setDevVisible] = useState(false);
-  const [devEmail, setDevEmail] = useState("");
-  const [devPassword, setDevPassword] = useState("");
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const host = window.location.hostname;
-    setDevVisible(host === "localhost" || host === "127.0.0.1");
-  }, []);
+  const [pwEmail, setPwEmail] = useState("");
+  const [pwPassword, setPwPassword] = useState("");
 
   const callbackUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback?next=${encodeURIComponent(redirect)}`;
 
@@ -66,8 +58,8 @@ export function LoginForm() {
     setError(null);
     setPending(true);
     const { error } = await supabase.auth.signInWithPassword({
-      email: devEmail,
-      password: devPassword,
+      email: pwEmail,
+      password: pwPassword,
     });
     setPending(false);
     if (error) {
@@ -92,6 +84,45 @@ export function LoginForm() {
         Prihlásiť cez Google
       </Button>
 
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            alebo heslom
+          </span>
+        </div>
+      </div>
+
+      <form onSubmit={signInWithPassword} className="space-y-3">
+        <div className="space-y-1">
+          <Label htmlFor="pw-email">Email</Label>
+          <Input
+            id="pw-email"
+            type="email"
+            autoComplete="email"
+            value={pwEmail}
+            onChange={(e) => setPwEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="pw-password">Heslo</Label>
+          <Input
+            id="pw-password"
+            type="password"
+            autoComplete="current-password"
+            value={pwPassword}
+            onChange={(e) => setPwPassword(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Prihlasujem…" : "Prihlásiť heslom"}
+        </Button>
+      </form>
+
       {EMAIL_LOGIN_ENABLED && (
         <>
           <div className="relative">
@@ -100,7 +131,7 @@ export function LoginForm() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                alebo email
+                alebo magic link
               </span>
             </div>
           </div>
@@ -113,61 +144,15 @@ export function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <Button type="submit" className="w-full" disabled={pending}>
-              {pending ? "Posielam…" : "Poslať magic link"}
-            </Button>
-          </form>
-        </>
-      )}
-
-      {devVisible && (
-        <>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-dashed" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                dev login (localhost)
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={signInWithPassword} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="dev-email">Email</Label>
-              <Input
-                id="dev-email"
-                type="email"
-                value={devEmail}
-                onChange={(e) => setDevEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="dev-password">Heslo</Label>
-              <Input
-                id="dev-password"
-                type="password"
-                value={devPassword}
-                onChange={(e) => setDevPassword(e.target.value)}
-                required
-              />
-            </div>
             <Button
               type="submit"
               variant="secondary"
               className="w-full"
               disabled={pending}
             >
-              {pending ? "Prihlasujem…" : "Prihlásiť (dev)"}
+              {pending ? "Posielam…" : "Poslať magic link"}
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground">
-            Tento formulár vidíš iba na localhost. Usera si vytvoríš v Supabase
-            Dashboard → Authentication → Users → Add user (zaškrtni Auto
-            Confirm).
-          </p>
         </>
       )}
 
