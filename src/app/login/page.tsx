@@ -1,4 +1,8 @@
+import { Suspense } from "react";
+
 import { LoginForm } from "./login-form";
+
+export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   return (
@@ -10,7 +14,9 @@ export default function LoginPage() {
             Prihlás sa a makaj. Alebo zmrzni – sme tu, aby sme ti nedali pokoj.
           </p>
         </div>
-        <LoginForm />
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   );

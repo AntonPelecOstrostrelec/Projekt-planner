@@ -91,6 +91,46 @@ Otvor [http://localhost:3000](http://localhost:3000). Prihlás sa → vytvor wor
 
 ---
 
+## Deploy na Vercel
+
+Repo je pripravené na Vercel. Postupuj takto:
+
+### 1. Naimportuj projekt
+
+1. Otvor [vercel.com/new](https://vercel.com/new) a prihlás sa cez GitHub.
+2. Vyber tento repo `AntonPelecOstrostrelec/Projekt-planner`.
+3. Framework preset by sa mal sám detekovať ako **Next.js**. Build a output directory nechaj defaultne.
+
+### 2. Environment variables
+
+Pred prvým deploymentom pridaj v Vercel projekte → **Settings → Environment Variables** (pre Production **aj** Preview):
+
+| Name | Value | Kde nájsť |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://xyz.supabase.co` | Supabase → Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOiJI…` | Supabase → Project Settings → API (anon / public) |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOiJI…` | Supabase → Project Settings → API (**secret, nikdy nepushovať**) |
+| `NEXT_PUBLIC_APP_URL` | `https://tvoj-projekt.vercel.app` | URL vercel deploymentu (po prvom deploye) |
+
+### 3. Supabase redirect URL
+
+V Supabase Dashboard → **Authentication → URL Configuration**:
+
+- **Site URL**: `https://tvoj-projekt.vercel.app`
+- **Redirect URLs**: pridaj `https://tvoj-projekt.vercel.app/auth/callback` a `https://*-tvoj-tim.vercel.app/auth/callback` (pre preview deploye)
+
+### 4. Deploy
+
+Stlač **Deploy**. Prvý build trvá cca 1–2 minúty. Každý push na `main` auto-deployuje production, každý PR dostane preview URL.
+
+### 5. Ak máš vlastnú doménu
+
+Vercel → Settings → Domains → pridaj doménu, prepni `NEXT_PUBLIC_APP_URL` a Supabase Site URL na ňu.
+
+> **Pozn:** migrácie v `supabase/migrations/` spúšťaj ručne cez SQL editor (alebo `supabase db push` cez CLI s prepojeným cloud projektom). Vercel ich neaplikuje automaticky.
+
+---
+
 ## Skripty
 
 | Príkaz | Čo robí |
