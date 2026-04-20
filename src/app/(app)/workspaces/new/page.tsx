@@ -36,17 +36,17 @@ async function createWorkspace(formData: FormData) {
   const base = slugify(name) || "workspace";
   const slug = `${base}-${Math.random().toString(36).slice(2, 6)}`;
 
-  const { data, error } = await supabase
-    .from("workspaces")
-    .insert({ name, slug, owner_id: user.id })
-    .select("slug")
-    .single();
+  const { data, error } = await supabase.rpc("create_workspace", {
+    workspace_name: name,
+    workspace_slug: slug,
+  });
 
   if (error || !data) {
     throw new Error(error?.message ?? "Nepodarilo sa vytvoriť workspace");
   }
 
-  redirect(`/w/${data.slug}`);
+  const row = Array.isArray(data) ? data[0] : data;
+  redirect(`/w/${row.slug}`);
 }
 
 export default function NewWorkspacePage() {
