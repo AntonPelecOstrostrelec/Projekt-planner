@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
+// Flip to `true` once Supabase SMTP is configured and magic-link delivery
+// is reliable. Until then we rely on Google OAuth only.
+const EMAIL_LOGIN_ENABLED = false;
+
 export function LoginForm() {
   const search = useSearchParams();
   const redirect = search.get("redirect") ?? "/";
@@ -58,29 +62,33 @@ export function LoginForm() {
         Prihlásiť cez Google
       </Button>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            alebo email
-          </span>
-        </div>
-      </div>
+      {EMAIL_LOGIN_ENABLED && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                alebo email
+              </span>
+            </div>
+          </div>
 
-      <form onSubmit={signInWithEmail} className="space-y-3">
-        <Input
-          type="email"
-          placeholder="ty@tvoj-email.sk"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Posielam…" : "Poslať magic link"}
-        </Button>
-      </form>
+          <form onSubmit={signInWithEmail} className="space-y-3">
+            <Input
+              type="email"
+              placeholder="ty@tvoj-email.sk"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Button type="submit" className="w-full" disabled={pending}>
+              {pending ? "Posielam…" : "Poslať magic link"}
+            </Button>
+          </form>
+        </>
+      )}
 
       {error && (
         <p className="text-sm text-destructive" role="alert">
