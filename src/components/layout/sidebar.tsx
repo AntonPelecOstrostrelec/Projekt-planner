@@ -2,28 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Calendar,
-  FolderKanban,
-  Home,
-  Lightbulb,
-  Settings,
-  Users,
-} from "lucide-react";
+import { FolderKanban, Home } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const nav = [
-  { href: "/", label: "Prehľad", icon: Home },
-  { href: "/projects", label: "Projekty", icon: FolderKanban },
-  { href: "/calendar", label: "Kalendár", icon: Calendar },
-  { href: "/ideas", label: "Nápady", icon: Lightbulb },
-  { href: "/team", label: "Tím", icon: Users },
-  { href: "/settings", label: "Nastavenia", icon: Settings },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+
+  // If inside a workspace, show workspace-scoped shortcuts
+  const match = pathname.match(/^\/w\/([^/]+)/);
+  const wsSlug = match?.[1];
+
+  const nav = wsSlug
+    ? [
+        { href: `/w/${wsSlug}`, label: "Prehľad", icon: Home, exact: true },
+        {
+          href: `/w/${wsSlug}/projects`,
+          label: "Projekty",
+          icon: FolderKanban,
+        },
+      ]
+    : [{ href: "/", label: "Prehľad", icon: Home, exact: true }];
 
   return (
     <aside className="hidden w-60 shrink-0 border-r bg-muted/20 md:flex md:flex-col">
@@ -33,8 +32,10 @@ export function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 space-y-1 p-3">
-        {nav.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+        {nav.map(({ href, label, icon: Icon, exact }) => {
+          const active = exact
+            ? pathname === href
+            : pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
