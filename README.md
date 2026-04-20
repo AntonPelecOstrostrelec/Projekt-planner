@@ -100,6 +100,7 @@ Repo je pripravené na Vercel. Postupuj takto:
 1. Otvor [vercel.com/new](https://vercel.com/new) a prihlás sa cez GitHub.
 2. Vyber tento repo `AntonPelecOstrostrelec/Projekt-planner`.
 3. Framework preset by sa mal sám detekovať ako **Next.js**. Build a output directory nechaj defaultne.
+4. **Production Branch**: Vercel štandardne používa `main`. Keďže zatiaľ pracujeme na `claude/project-management-app-design-DmQMX`, pred prvým deployom choď do **Settings → Git → Production Branch** a prepni ju na `claude/project-management-app-design-DmQMX` (alebo si najprv vytvor `main` branch z aktuálneho stavu).
 
 ### 2. Environment variables
 
@@ -112,6 +113,8 @@ Pred prvým deploymentom pridaj v Vercel projekte → **Settings → Environment
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOiJI…` | Supabase → Project Settings → API (**secret, nikdy nepushovať**) |
 | `NEXT_PUBLIC_APP_URL` | `https://tvoj-projekt.vercel.app` | URL vercel deploymentu (po prvom deploye) |
 
+Bez prvých dvoch env vars sa appka síce zbuildí, ale pri prvom requeste spadne middleware. Radšej ich nastav ešte pred Deployom.
+
 ### 3. Supabase redirect URL
 
 V Supabase Dashboard → **Authentication → URL Configuration**:
@@ -121,13 +124,25 @@ V Supabase Dashboard → **Authentication → URL Configuration**:
 
 ### 4. Deploy
 
-Stlač **Deploy**. Prvý build trvá cca 1–2 minúty. Každý push na `main` auto-deployuje production, každý PR dostane preview URL.
+Stlač **Deploy**. Prvý build trvá cca 1–2 minúty. Každý push na production branch auto-deployuje production, každý PR dostane preview URL.
 
 ### 5. Ak máš vlastnú doménu
 
 Vercel → Settings → Domains → pridaj doménu, prepni `NEXT_PUBLIC_APP_URL` a Supabase Site URL na ňu.
 
 > **Pozn:** migrácie v `supabase/migrations/` spúšťaj ručne cez SQL editor (alebo `supabase db push` cez CLI s prepojeným cloud projektom). Vercel ich neaplikuje automaticky.
+
+### Ak deploy padne
+
+Pozri sa do Vercel → **Deployments → (failed build) → Build Logs**. Najčastejšie problémy:
+
+| Symptóm | Pravdepodobná príčina | Fix |
+|---|---|---|
+| "No Production Deployment" / nič sa nedeje | Production branch v Vercel je `main`, ale push ide na iný branch | Zmeň production branch alebo vytvor `main` |
+| Build padne na `Module not found` | Chýba lockfile alebo Node verzia | Over `package-lock.json` je pushnutý, Node ≥ 20 |
+| Build prejde, stránka dá 500 | Chýbajúce `NEXT_PUBLIC_SUPABASE_*` env vars | Pridaj do Vercel env + redeploy |
+| Auth callback redirectuje na localhost | Chýba Site URL / Redirect URL v Supabase | Oprav v Supabase Auth settings |
+| "Invalid API key" v logoch | Zle skopírovaný `anon` key | Preklop cez Supabase → API page, aj bez medzier |
 
 ---
 
